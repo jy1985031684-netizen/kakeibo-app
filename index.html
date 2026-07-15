@@ -244,6 +244,11 @@
 
 <header>家計簿</header>
 
+<div id="storageWarning" style="display:none;background:#fff2f2;color:var(--expense);padding:10px 14px;font-size:13px;text-align:center;line-height:1.5;">
+  ⚠️ この端末でデータ保存がブロックされています。<br>
+  「設定」→「Safari」→「すべてのクッキーをブロック」をオフにしてください。
+</div>
+
 <div class="container">
 
   <div class="month-nav">
@@ -333,6 +338,16 @@
   }
   function saveTx(list){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+  function storageAvailable(){
+    try{
+      const testKey = '__storage_test__';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      return true;
+    }catch(e){
+      return false;
+    }
   }
   function uid(){
     return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
@@ -446,7 +461,15 @@
     } else {
       list.push({ id: uid(), date, amount, memo, type: currentType, category: currentCat });
     }
-    saveTx(list);
+    try{
+      saveTx(list);
+    }catch(e){
+      document.getElementById('storageWarning').style.display = 'block';
+      amountError.textContent = 'この端末では保存がブロックされています(下の警告を確認してください)';
+      amountInput.classList.add('input-error');
+      amountError.style.display = 'block';
+      return;
+    }
     closeModal();
     renderAll();
   });
@@ -587,6 +610,9 @@
   });
 
   // init
+  if(!storageAvailable()){
+    document.getElementById('storageWarning').style.display = 'block';
+  }
   setType('expense');
   renderAll();
 })();
