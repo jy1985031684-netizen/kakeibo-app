@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
 <title>家計簿</title>
 <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22%E5%AE%B6%E8%A8%88%E7%B0%BF%22,%22short_name%22:%22%E5%AE%B6%E8%A8%88%E7%B0%BF%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f5f5f7%22,%22theme_color%22:%22%234a90d9%22}">
 <style>
@@ -384,6 +384,19 @@
   document.getElementById('addBtn').addEventListener('click', ()=>openModal(null));
   document.getElementById('cancelBtn').addEventListener('click', closeModal);
   overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+  // iOSでソフトウェアキーボードが出た際、position:fixedのオーバーレイが
+  // キーボードの下に隠れてボタンが押せなくなるのを防ぐため、
+  // 表示領域(visualViewport)に合わせて高さを追従させる
+  if(window.visualViewport){
+    function fitToVisualViewport(){
+      overlay.style.height = window.visualViewport.height + 'px';
+      overlay.style.top = window.visualViewport.offsetTop + 'px';
+    }
+    window.visualViewport.addEventListener('resize', fitToVisualViewport);
+    window.visualViewport.addEventListener('scroll', fitToVisualViewport);
+    fitToVisualViewport();
+  }
 
   function setType(type){
     currentType = type;
