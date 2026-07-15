@@ -196,6 +196,16 @@
     color:#fff;
     border-color:var(--primary);
   }
+  input.input-error{
+    border-color:var(--expense);
+    background:#fff2f2;
+  }
+  .error-msg{
+    display:none;
+    color:var(--expense);
+    font-size:12px;
+    margin-top:6px;
+  }
   .modal-buttons{
     display:flex;
     gap:10px;
@@ -293,6 +303,7 @@
 
     <label>金額</label>
     <input type="number" id="inpAmount" placeholder="0" inputmode="numeric">
+    <div class="error-msg" id="amountError">金額を入力してください(0より大きい数字)</div>
 
     <label>メモ(任意)</label>
     <input type="text" id="inpMemo" placeholder="メモ">
@@ -363,6 +374,8 @@
     document.getElementById('inpMemo').value = tx ? (tx.memo||'') : '';
     currentCat = tx ? tx.category : (currentType==='income'?INCOME_CATS[0]:EXPENSE_CATS[0]);
     renderCatGrid();
+    document.getElementById('inpAmount').classList.remove('input-error');
+    document.getElementById('amountError').style.display = 'none';
     overlay.classList.add('show');
   }
   function closeModal(){
@@ -397,12 +410,21 @@
     });
   }
 
+  const amountInput = document.getElementById('inpAmount');
+  const amountError = document.getElementById('amountError');
+  amountInput.addEventListener('input', ()=>{
+    amountInput.classList.remove('input-error');
+    amountError.style.display = 'none';
+  });
+
   document.getElementById('saveBtn').addEventListener('click', ()=>{
     const date = document.getElementById('inpDate').value || todayStr();
-    const amount = parseFloat(document.getElementById('inpAmount').value);
+    const amount = parseFloat(amountInput.value);
     const memo = document.getElementById('inpMemo').value.trim();
     if(!amount || amount<=0){
-      alert('金額を入力してください');
+      amountInput.classList.add('input-error');
+      amountError.style.display = 'block';
+      amountInput.focus();
       return;
     }
     let list = loadTx();
